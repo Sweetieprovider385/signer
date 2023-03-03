@@ -16,6 +16,11 @@ keywords.
 
 Try to do one pull request per change.
 
+### Commit Messages
+
+When creating pull request or squash commit message, please follow 
+[conventional commits specifications](https://www.conventionalcommits.org/en/v1.0.0/).
+
 ### Updating the changelog
 
 Update the changes you have made in
