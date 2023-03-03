@@ -1,0 +1,6 @@
+# Ignore everything that goes into docker context
+*
+# Allow following:
+!Cargo.toml
+!Cargo.lock
+!src/
