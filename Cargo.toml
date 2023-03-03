@@ -1,0 +1,11 @@
+[package]
+name = "r-signer"
+version = "0.1.0"
+edition = "2021"
+description = "Remote Signer for Ethereum Consensus clients"
+repository = "https://github.com/usmansnetwork/r-signer"
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

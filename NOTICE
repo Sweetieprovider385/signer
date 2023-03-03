@@ -1,0 +1,12 @@
+Copyright (c) 2023. Usmans Network
+
+SPDX-License-Identifier: Apache-2.0
+
+This software contains logic which may have been adapted from:
+
+|   Product  |                 Link                    | License
+|------------|-----------------------------------------|-----------
+| Teku       | https://github.com/consensys/teku       | Apache-2.0
+| Web3Signer | https://github.com/consensys/web3signer | Apache-2.0
+
+See cargo.toml file for libraries used by this software.
