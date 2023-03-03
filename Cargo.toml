@@ -1,11 +1,16 @@
-[package]
-name = "r-signer"
-version = "0.1.0"
+[workspace]
+members = ["crates/*"]
+
+[workspace.package]
+rust-version = "1.67"
 edition = "2021"
 description = "Remote Signer for Ethereum Consensus clients"
 repository = "https://github.com/usmansnetwork/r-signer"
 license = "Apache-2.0"
+authors = ["Usmans Network team"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace.dependencies]
+# local crates
+# protection-db = { "./crates/protection-db", version = "0.0.0" }
 
-[dependencies]
+# non-local crates ... 

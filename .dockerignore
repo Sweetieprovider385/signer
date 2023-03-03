@@ -3,4 +3,4 @@
 # Allow following:
 !Cargo.toml
 !Cargo.lock
-!src/
+!crates/
