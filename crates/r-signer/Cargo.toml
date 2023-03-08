@@ -12,3 +12,6 @@ rust-version.workspace = true
 
 [dependencies]
 rocket = "0.5.0-rc.2"
+
+# local crate dependencies
+bls-keystore.workspace = true
