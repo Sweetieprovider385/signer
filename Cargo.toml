@@ -29,5 +29,6 @@ debug = 0
 [workspace.dependencies]
 # local crates
 bls-keystore = { path = "./crates/bls-keystore", version = "0.0.0" }
+specs = { path = "./crates/specs", version = "0.0.0" }
 
 # non-local crates ... 
