@@ -78,7 +78,7 @@ pub struct Spec {
     //../presets/mainnet/phase0.yaml
     max_committees_per_slot: u64,
     target_committee_size: u64,
-    max_validators_per_committee: u64,
+    max_validators_per_committee: u64, // used in 'Attestation' to calculate aggregation_bits
     shuffle_round_count: u64,
     hysteresis_quotient: u64,
     hysteresis_downward_multiplier: u64,
@@ -178,5 +178,10 @@ impl Spec {
             .merge(config_figment)
             .extract()
             .map_err(|e| anyhow!("Error extracting config {}: {}", network, e))
+    }
+
+    /// Compute epoch at slot
+    pub fn compute_epoch_at_slot(&self, slot: u64) -> u64 {
+        slot / self.slots_per_epoch
     }
 }
