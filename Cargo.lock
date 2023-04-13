@@ -1620,7 +1620,7 @@ dependencies = [
  "serde",
  "serde_json",
  "specs",
- "ssz-rs",
+ "ssz_rs",
  "thiserror",
 ]
 
@@ -1673,23 +1673,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5d6e0250b93c8427a177b849d144a96d5acc57006149479403d7861ab721e34"
 
 [[package]]
-name = "ssz-rs"
+name = "ssz_rs"
 version = "0.8.0"
-source = "git+https://github.com/ralexstokes/ssz-rs#688a82389f60ed68c10404417c1f7f442ba748a1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f923762d556417668b192ac2fdc9827ea21e6df011d8a0a7e68f3d5da095a675"
 dependencies = [
  "bitvec",
  "hex",
  "num-bigint",
  "serde",
  "sha2 0.9.9",
- "ssz-rs-derive",
+ "ssz_rs_derive",
  "thiserror",
 ]
 
 [[package]]
-name = "ssz-rs-derive"
+name = "ssz_rs_derive"
 version = "0.8.0"
-source = "git+https://github.com/ralexstokes/ssz-rs#688a82389f60ed68c10404417c1f7f442ba748a1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c679ebd9c1ceeb0f9e5b839952b4a71bfe35a791b431ef7b3ee0b71b7588b565"
 dependencies = [
  "proc-macro2",
  "quote",

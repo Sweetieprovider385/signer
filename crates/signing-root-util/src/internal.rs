@@ -7,6 +7,11 @@ pub trait SigningRoot {
     fn compute_signing_root(&mut self, domain: &Hash256) -> Result<Hash256>;
 }
 
+#[derive(PartialEq, Eq, Debug, Default, SimpleSerialize)]
+struct Bytes32 {
+    pub beacon_block_root: [u8; 32],
+}
+
 #[derive(PartialEq, Eq, Debug, Default, Clone, SimpleSerialize)]
 pub struct SszU64(pub u64);
 
@@ -268,5 +273,169 @@ impl DepositMessage {
         let domain_root = [&domain_type.value(), &fork_data_root.as_ref()[..28]].concat();
 
         Ok(Hash256::from_slice(&domain_root))
+    }
+}
+
+impl ValidatorRegistration {
+    pub fn compute_domain(&self, genesis_fork_version: &[u8; 4]) -> Result<Hash256> {
+        let domain_type = DomainType::ApplicationBuilder;
+
+        let mut fork_data = InternalForkData {
+            current_version: *genesis_fork_version,
+            genesis_validators_root: [0; 32],
+        };
+
+        let fork_data_root = fork_data.hash_tree_root()?;
+        let domain_root = [&domain_type.value(), &fork_data_root.as_ref()[..28]].concat();
+
+        Ok(Hash256::from_slice(&domain_root))
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, SimpleSerialize)]
+pub struct InternalValidatorRegistration {
+    pub fee_recipient: Vector<u8, 20>,
+    pub gas_limit: u64,
+    pub timestamp: u64,
+    pub pubkey: Vector<u8, 48>,
+}
+
+impl TryFrom<&ValidatorRegistration> for InternalValidatorRegistration {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &ValidatorRegistration) -> Result<Self, Self::Error> {
+        let fee_recipient = Vector::<u8, 20>::try_from(value.fee_recipient.clone())
+            .map_err(|_| anyhow::anyhow!("Error converting fee_recipient bytes to ssz Vector"))?;
+
+        let gas_limit = value.gas_limit;
+        let timestamp = value.timestamp;
+
+        let pubkey = Vector::<u8, 48>::try_from(value.pubkey.clone())
+            .map_err(|_| anyhow::anyhow!("Error converting pubkey bytes to ssz Vector"))?;
+
+        Ok(Self {
+            fee_recipient,
+            gas_limit,
+            timestamp,
+            pubkey,
+        })
+    }
+}
+
+impl SigningRoot for InternalValidatorRegistration {
+    fn compute_signing_root(&mut self, domain: &Hash256) -> Result<Hash256> {
+        let root = InternalSigningData {
+            object_root: self.hash_tree_root()?,
+            domain: *domain.as_fixed_bytes(),
+        }
+        .hash_tree_root()?;
+        Ok(Hash256::from_slice(root.as_ref()))
+    }
+}
+
+impl SyncCommitteeMessage {
+    pub fn compute_signing_root(&self, domain: &Hash256) -> Result<Hash256> {
+        let mut bytes32 = Bytes32 {
+            beacon_block_root: *self.beacon_block_root.as_fixed_bytes(),
+        };
+        let root = InternalSigningData {
+            object_root: bytes32.hash_tree_root()?,
+            domain: *domain.as_fixed_bytes(),
+        }
+        .hash_tree_root()?;
+        Ok(Hash256::from_slice(root.as_ref()))
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, SimpleSerialize)]
+pub struct InternalSyncAggregatorSelectionData {
+    pub slot: u64,
+    pub subcommittee_index: u64,
+}
+
+impl TryFrom<&SyncAggregatorSelectionData> for InternalSyncAggregatorSelectionData {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &SyncAggregatorSelectionData) -> Result<Self, Self::Error> {
+        Ok(Self {
+            slot: value.slot,
+            subcommittee_index: value.subcommittee_index,
+        })
+    }
+}
+
+impl SigningRoot for InternalSyncAggregatorSelectionData {
+    fn compute_signing_root(&mut self, domain: &Hash256) -> Result<Hash256> {
+        let root = InternalSigningData {
+            object_root: self.hash_tree_root()?,
+            domain: *domain.as_fixed_bytes(),
+        }
+        .hash_tree_root()?;
+        Ok(Hash256::from_slice(root.as_ref()))
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, SimpleSerialize)]
+pub struct InternalSyncCommitteeContribution<const N: usize> {
+    pub slot: u64,
+    pub beacon_block_root: [u8; 32],
+    pub subcommittee_index: u64,
+    pub aggregation_bits: Bitvector<N>,
+    pub signature: Vector<u8, 96>,
+}
+
+impl<const N: usize> TryFrom<&SyncCommitteeContribution> for InternalSyncCommitteeContribution<N> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &SyncCommitteeContribution) -> Result<Self, Self::Error> {
+        let slot = value.slot;
+        let beacon_block_root = *value.beacon_block_root.as_fixed_bytes();
+        let subcommittee_index = value.subcommittee_index;
+        let aggregation_bits = Bitvector::try_from(value.aggregation_bits.as_slice())?;
+        let signature = Vector::<u8, 96>::try_from(value.signature.clone())
+            .map_err(|_| anyhow::anyhow!("Error converting signature bytes to ssz Vector"))?;
+
+        Ok(Self {
+            slot,
+            beacon_block_root,
+            subcommittee_index,
+            aggregation_bits,
+            signature,
+        })
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, SimpleSerialize)]
+pub struct InternalContributionAndProof<const N: usize> {
+    pub aggregator_index: u64,
+    pub contribution: InternalSyncCommitteeContribution<N>,
+    pub selection_proof: Vector<u8, 96>,
+}
+
+impl<const N: usize> TryFrom<&ContributionAndProof> for InternalContributionAndProof<N> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &ContributionAndProof) -> Result<Self, Self::Error> {
+        let aggregator_index = value.aggregator_index;
+        let contribution = InternalSyncCommitteeContribution::try_from(&value.contribution)?;
+        let selection_proof = Vector::<u8, 96>::try_from(value.selection_proof.clone())
+            .map_err(|_| anyhow::anyhow!("Error converting selection_proof bytes to ssz Vector"))?;
+
+        Ok(Self {
+            aggregator_index,
+            contribution,
+            selection_proof,
+        })
+    }
+}
+
+impl<const N: usize> InternalContributionAndProof<N> {
+    pub fn compute_signing_root(&mut self, domain: &Hash256) -> Result<Hash256> {
+        let root = InternalSigningData {
+            object_root: self.hash_tree_root()?,
+            domain: *domain.as_fixed_bytes(),
+        }
+        .hash_tree_root()?;
+        Ok(Hash256::from_slice(root.as_ref()))
     }
 }

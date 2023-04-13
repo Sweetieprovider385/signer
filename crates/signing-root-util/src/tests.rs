@@ -309,3 +309,132 @@ fn signing_root_for_deposit_is_calculated() {
 
     assert_eq!(computed_signing_root, expected_signing_root);
 }
+
+#[test]
+fn signing_root_for_validator_registration_is_calculated() {
+    let json_str = r#"{
+        "fee_recipient" : "0x6fdfab408c56b6105a76eff5c0435d09fc6ed7a9",
+        "gas_limit" : "4658411424342975020",
+        "timestamp" : "4663368873993027404",
+        "pubkey" : "0x8f82597c919c056571a05dfe83e6a7d32acf9ad8931be04d11384e95468cd68b40129864ae12745f774654bbac09b057"
+      }"#;
+    let validator_registration: ValidatorRegistration = serde_json::from_str(json_str).unwrap();
+    let expected_signing_root =
+        hex!("e4d2b3dd1e23807b90af0b1768cc7de12d4353320adb486f1bdaeed6b67009ea");
+
+    let spec = Spec::new("minimal").unwrap();
+    let signing_root_util = SigningRootUtil::new(&spec);
+    let computed_signing_root = *signing_root_util
+        .signing_root_for_validator_registration(&validator_registration)
+        .unwrap()
+        .as_fixed_bytes();
+
+    assert_eq!(computed_signing_root, expected_signing_root);
+}
+
+#[test]
+fn signing_root_for_sync_committee_message_is_calculated() {
+    let fork_info_json = r#"{
+        "fork" : {
+          "previous_version" : "0x00000001",
+          "current_version" : "0x00000001",
+          "epoch" : "1"
+        },
+        "genesis_validators_root" : "0x04700007fabc8282644aed6d1c7c9e21d38a03a0c4ba193f3afe428824b3a673"
+    }"#;
+
+    let fork_info: ForkInfo = serde_json::from_str(fork_info_json).unwrap();
+
+    let json_str = r#"{
+        "beacon_block_root" : "0x235bc3400c2839fd856a524871200bd5e362db615fc4565e1870ed9a2a936464",
+        "slot" : "0"
+      }"#;
+
+    let sync_committee_message: SyncCommitteeMessage = serde_json::from_str(json_str).unwrap();
+    let expected_signing_root =
+        hex!("a6f60df2817ea5b52eed1fefebbad746ef64c6249fc05c90c9e0f520cc75bb95");
+
+    let spec = Spec::new("minimal").unwrap();
+    let signing_root_util = SigningRootUtil::new(&spec);
+    let computed_signing_root = *signing_root_util
+        .signing_root_for_sync_committee_message(&sync_committee_message, &fork_info)
+        .unwrap()
+        .as_fixed_bytes();
+
+    assert_eq!(computed_signing_root, expected_signing_root);
+}
+
+#[test]
+fn signing_root_for_sync_aggregator_selection_data_is_calculated() {
+    let fork_info_json = r#"{
+        "fork" : {
+          "previous_version" : "0x00000001",
+          "current_version" : "0x00000001",
+          "epoch" : "1"
+        },
+        "genesis_validators_root" : "0x04700007fabc8282644aed6d1c7c9e21d38a03a0c4ba193f3afe428824b3a673"
+    }"#;
+
+    let fork_info: ForkInfo = serde_json::from_str(fork_info_json).unwrap();
+
+    let json_str = r#"{
+        "slot" : "0",
+        "subcommittee_index" : "0"
+      }"#;
+
+    let sync_aggregator_selection_data: SyncAggregatorSelectionData =
+        serde_json::from_str(json_str).unwrap();
+    let expected_signing_root =
+        hex!("50d85c783ab27c1eb3f3efa914b91cb93ffd677137b15c27ba5bb548306e6963");
+
+    let spec = Spec::new("minimal").unwrap();
+    let signing_root_util = SigningRootUtil::new(&spec);
+    let computed_signing_root = *signing_root_util
+        .signing_root_for_sync_aggregator_selection_data(
+            &sync_aggregator_selection_data,
+            &fork_info,
+        )
+        .unwrap()
+        .as_fixed_bytes();
+
+    assert_eq!(computed_signing_root, expected_signing_root);
+}
+
+#[test]
+fn signing_root_for_sync_committee_contribution_and_proof_is_calculated() {
+    let fork_info_json = r#"{
+        "fork" : {
+          "previous_version" : "0x00000001",
+          "current_version" : "0x00000001",
+          "epoch" : "1"
+        },
+        "genesis_validators_root" : "0x04700007fabc8282644aed6d1c7c9e21d38a03a0c4ba193f3afe428824b3a673"
+    }"#;
+
+    let fork_info: ForkInfo = serde_json::from_str(fork_info_json).unwrap();
+
+    let json_str = r#"{
+        "aggregator_index" : "11",
+        "selection_proof" : "0x8f5c34de9e22ceaa7e8d165fc0553b32f02188539e89e2cc91e2eb9077645986550d872ee3403204ae5d554eae3cac12124e18d2324bccc814775316aaef352abc0450812b3ca9fde96ecafa911b3b8bfddca8db4027f08e29c22a9c370ad933",
+        "contribution" : {
+          "slot" : "0",
+          "beacon_block_root" : "0x235bc3400c2839fd856a524871200bd5e362db615fc4565e1870ed9a2a936464",
+          "subcommittee_index" : "1",
+          "aggregation_bits" : "0x24",
+          "signature" : "0x9005ed0936f527d416609285b355fe6b9610d730c18b9d2f4942ba7d0eb95ba304ff46b6a2fb86f0c756bf09274db8e11399b7642f9fc5ae50b5bd9c1d87654277a19bfc3df78d36da16f44a48630d9550774a4ca9f3a5b55bbf33345ad2ec71"
+        }
+      }"#;
+
+    let contribution_and_proof: ContributionAndProof = serde_json::from_str(json_str).unwrap();
+    let expected_signing_root =
+        hex!("ae94702468b584a3b1c422bc1b39cc523d9175ba3b9ac1cccb699c00507cc1a5");
+
+    let spec = Spec::new("minimal").unwrap();
+    let signing_root_util = SigningRootUtil::new(&spec);
+    let computed_signing_root = *signing_root_util
+        .signing_root_for_sync_committee_contribution_and_proof(&contribution_and_proof, &fork_info)
+        .unwrap()
+        .as_fixed_bytes();
+
+    assert_eq!(computed_signing_root, expected_signing_root);
+}

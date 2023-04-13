@@ -51,7 +51,7 @@ impl DomainType {
             DomainType::VoluntaryExit => [4, 0, 0, 0],
             DomainType::SelectionProof => [5, 0, 0, 0],
             DomainType::AggregateAndProof => [6, 0, 0, 0],
-            DomainType::ApplicationBuilder => [7, 0, 0, 0],
+            DomainType::ApplicationBuilder => [0, 0, 0, 1],
             DomainType::SyncCommittee => [7, 0, 0, 0],
             DomainType::SyncCommitteeSelectionProof => [8, 0, 0, 0],
             DomainType::ContributionAndProof => [9, 0, 0, 0],
@@ -146,4 +146,53 @@ pub struct DepositMessage {
     pub amount: u64,
     #[serde(with = "eth2_serde_utils::bytes_4_hex")]
     pub genesis_fork_version: [u8; 4],
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, Serialize, Deserialize)]
+pub struct ValidatorRegistration {
+    #[serde(with = "eth2_serde_utils::hex_vec")]
+    pub fee_recipient: Vec<u8>, // TODO: Customize for asserting length 20
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub gas_limit: u64,
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub timestamp: u64,
+    #[serde(with = "eth2_serde_utils::hex_vec")]
+    pub pubkey: Vec<u8>, // TODO: Customize for asserting length 48
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, Serialize, Deserialize)]
+pub struct SyncCommitteeMessage {
+    pub beacon_block_root: Hash256,
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub slot: u64,
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, Serialize, Deserialize)]
+pub struct SyncAggregatorSelectionData {
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub slot: u64,
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub subcommittee_index: u64,
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, Serialize, Deserialize)]
+pub struct SyncCommitteeContribution {
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub slot: u64,
+    pub beacon_block_root: Hash256,
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub subcommittee_index: u64,
+    #[serde(with = "eth2_serde_utils::hex_vec")]
+    pub aggregation_bits: Vec<u8>,
+    #[serde(with = "eth2_serde_utils::hex_vec")]
+    pub signature: Vec<u8>,
+}
+
+#[derive(PartialEq, Eq, Debug, Default, Clone, Serialize, Deserialize)]
+pub struct ContributionAndProof {
+    #[serde(with = "eth2_serde_utils::quoted_u64")]
+    pub aggregator_index: u64,
+    pub contribution: SyncCommitteeContribution,
+    #[serde(with = "eth2_serde_utils::hex_vec")]
+    pub selection_proof: Vec<u8>, //bls signature
 }

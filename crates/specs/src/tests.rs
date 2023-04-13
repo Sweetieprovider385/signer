@@ -17,7 +17,6 @@ fn mainnet_specs_works() {
 #[test]
 fn invalid_network_config() {
     let result = Spec::new("invalid.yaml");
-    dbg!(&result);
     assert!(result.is_err());
     assert_eq!(
         result.err().unwrap().to_string(),
