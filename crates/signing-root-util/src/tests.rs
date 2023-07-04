@@ -247,7 +247,7 @@ fn bls_signature_hashroot() {
 fn bls_signature_deserialize() {
     #[derive(PartialEq, Eq, Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
     struct Sig {
-        #[serde(with = "eth2_serde_utils::hex_vec")]
+        #[serde(with = "serde_utils::hex_vec")]
         signature: Vec<u8>,
     }
 
