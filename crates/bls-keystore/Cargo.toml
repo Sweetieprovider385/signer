@@ -19,7 +19,7 @@ serde_json = "1.0"
 anyhow = "1.0"
 scrypt = { version = "0.11.0", default-features = false}
 pbkdf2 = { version = "0.12", features = ["simple", "parallel"]}
-rand_core = {version = "0.6", features = ["std"]}
+rand_core = {version = "0.9", features = ["std"]}
 sha2 = {version = "0.10", default-features = false}
 ctr = "0.9"
 aes = "0.8"
